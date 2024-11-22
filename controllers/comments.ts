@@ -23,12 +23,12 @@ export const getComments = async (request: Request<{}, {}, {}, { sender?: string
 		return;
 	}
 
-	const filter = Object.entries(request.query)
+	const filters = Object.entries(request.query)
 		.filter(([key]) => Object.keys(commentModel.schema.obj).includes(key))
 		.reduce((previous, [key, value]) => ({ ...previous, [key]: value }), {});
 
 	try {
-		const comments = await commentModel.find(filter);
+		const comments = await commentModel.find(filters);
 		response.status(httpStatus.OK).send(comments);
 	} catch (error) {
 		next(error);
@@ -85,7 +85,11 @@ export const deleteCommentById = async (request: Request<{ id: string }>, respon
 	const { id: commentId } = request.params;
 
 	try {
-		await commentModel.deleteOne({ _id: commentId });
+		const deleteResponse = await commentModel.findByIdAndDelete({ _id: commentId });
+		if (deleteResponse === null) {
+			response.status(httpStatus.NOT_FOUND).send(`Comment with id ${commentId} not found`);
+			return;
+		}
 		response.status(httpStatus.OK).send(`comment ${commentId} deleted`);
 	} catch (error) {
 		next(error);
@@ -93,11 +97,11 @@ export const deleteCommentById = async (request: Request<{ id: string }>, respon
 };
 
 export const errorHandler: ErrorRequestHandler = (error: Error, request: Request, response: Response, _next: NextFunction) => {
-	console.error(`An error occured in comments router at ${request.method} ${request.url} - ${error.message}`)
-
 	if (error.name === 'ValidationError') {
 		response.status(httpStatus.BAD_REQUEST).send(formatValidationError(error));
-	} else {
-		response.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal server error');
+		return;
 	}
+
+	console.error(`An error occured in comments router at ${request.method} ${request.url} - ${error.message}`)
+	response.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal server error');
 };
