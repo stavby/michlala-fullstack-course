@@ -15,11 +15,20 @@ export const createComment = async (request: Request, response: Response, next: 
 	}
 };
 
-export const getComments = async (request: Request<{}, {}, {}, { sender?: string }>, response: Response, next: NextFunction) => {
-	const { sender } = request.query;
+export const getComments = async (request: Request<{}, {}, {}, { sender?: string, postId?: string }>, response: Response, next: NextFunction) => {
+	const { postId } = request.query;
+
+	if (!!postId && !isValidObjectId(postId)) {
+		response.status(httpStatus.BAD_REQUEST).send(`Invalid id ${postId}`);
+		return;
+	}
+
+	const filter = Object.entries(request.query)
+		.filter(([key]) => Object.keys(commentModel.schema.obj).includes(key))
+		.reduce((previous, [key, value]) => ({ ...previous, [key]: value }), {});
 
 	try {
-		const comments = await commentModel.find(!!sender ? { sender } : {});
+		const comments = await commentModel.find(filter);
 		response.status(httpStatus.OK).send(comments);
 	} catch (error) {
 		next(error);

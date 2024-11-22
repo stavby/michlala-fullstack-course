@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+import { Schema, model } from 'mongoose';
 
-const commentSchema = new mongoose.Schema({
+const commentSchema = new Schema({
 	sender: {
 		type: String,
 		required: true,
@@ -8,7 +8,11 @@ const commentSchema = new mongoose.Schema({
 	content: {
 		type: String,
 		required: true,
+	},
+	postId: {
+		type: Schema.Types.ObjectId,
+		required: true,
 	}
 });
 
-export const commentModel = mongoose.model('comments', commentSchema);
+export const commentModel = model('comments', commentSchema);

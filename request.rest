@@ -34,7 +34,7 @@ POST http://localhost:8080/comments
 Content-Type: application/json
 
 {
-"sender": "yaron", "content": "hi! my first comment!"
+"sender": "yaron", "content": "hi! my first comment!", "postId": "6740bcfcaa86a22352cb55e1"
 }
 
 ###
@@ -44,6 +44,10 @@ GET http://localhost:8080/comments
 ###
 
 GET http://localhost:8080/comments?sender=yaron
+
+###
+
+GET http://localhost:8080/comments?postId=6740bcfcaa86a22352cb55e1
 
 ###
 
