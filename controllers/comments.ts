@@ -15,9 +15,11 @@ export const createComment = async (request: Request, response: Response, next: 
 	}
 };
 
-export const getComments = async (_request: Request, response: Response, next: NextFunction) => {
+export const getComments = async (request: Request<{}, {}, {}, { sender?: string }>, response: Response, next: NextFunction) => {
+	const { sender } = request.query;
+
 	try {
-		const comments = await commentModel.find();
+		const comments = await commentModel.find(!!sender ? { sender } : {});
 		response.status(httpStatus.OK).send(comments);
 	} catch (error) {
 		next(error);
@@ -58,10 +60,10 @@ export const updateCommentById = async (request: Request<{ id: string }>, respon
 	try {
 		const updateResponse = await commentModel.updateOne({ _id: commentId }, data);
 
-        if (updateResponse.matchedCount === 0) {
-            response.status(httpStatus.NOT_FOUND).send(`Comment with id ${commentId} not found`);
-            return;
-        }
+		if (updateResponse.matchedCount === 0) {
+			response.status(httpStatus.NOT_FOUND).send(`Comment with id ${commentId} not found`);
+			return;
+		}
 
 		response.status(httpStatus.OK).send(`Comment ${commentId} updated`);
 	} catch (error) {
