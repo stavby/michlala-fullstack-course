@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import { commentModel } from '../models/comments';
 import httpStatus from 'http-status';
+import { isValidObjectId } from 'mongoose';
+import { commentModel } from '../models/comments';
+import { formatValidationError } from '../utils/formatValidationError';
 
 export const createComment = async (request: Request, response: Response, next: NextFunction) => {
 	const data = request.body;
@@ -13,11 +15,29 @@ export const createComment = async (request: Request, response: Response, next: 
 	}
 };
 
+export const getComments = async (request: Request, response: Response, next: NextFunction) => {
+	try {
+		const comments = await commentModel.find();
+		response.status(httpStatus.OK).send(comments);
+	} catch (error) {
+		next(error);
+	}
+};
+
 export const getCommentById = async (request: Request, response: Response, next: NextFunction) => {
 	const commentId = request.params.id;
 
+	if (!isValidObjectId(commentId)) {
+		response.status(httpStatus.BAD_REQUEST).send(`Invalid id ${commentId}`);
+		return;
+	}
+
 	try {
-		const comment = await commentModel.findOne({ _id: commentId });
+		const comment = await commentModel.findById(commentId);
+
+		if (!comment) {
+			response.status(httpStatus.NOT_FOUND).send(`comment ${commentId} not found`);
+		}
 		response.status(httpStatus.OK).send(comment);
 	} catch (error) {
 		next(error);
@@ -50,5 +70,10 @@ export const deleteCommentById = async (request: Request, response: Response, ne
 
 export const errorHandler = (error: Error, request: Request, response: Response, _next: NextFunction) => {
 	console.error(`An error occured in comments router at ${request.method} ${request.url} - ${error.message}`)
-	response.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal server error');
+
+	if (error.name === 'ValidationError') {
+		response.status(httpStatus.BAD_REQUEST).send(formatValidationError(error));
+	} else {
+		response.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal server error');
+	}
 };

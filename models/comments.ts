@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const commentSchema = new mongoose.Schema({
-	owner: {
+	sender: {
 		type: String,
 		required: true,
 	},
