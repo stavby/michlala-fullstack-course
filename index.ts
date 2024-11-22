@@ -1,7 +1,9 @@
 import bodyParser from 'body-parser';
 import express from 'express';
-import { startDB } from './services/db';
 import dotenv from 'dotenv';
+import { startDB } from './services/db';
+import { commentsRouter } from './routes/comments';
+
 
 dotenv.config();
 
@@ -10,6 +12,8 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use('/comments', commentsRouter);
 
 startDB();
 
