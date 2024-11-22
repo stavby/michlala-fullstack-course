@@ -1,0 +1,29 @@
+###
+
+POST http://localhost:8080/posts 
+Content-Type: application/json
+
+{
+"title": "The Shlomi post!", "sender": "shlomi", "content": "Posting is soooo much fun!!!"
+}
+
+###
+
+GET http://localhost:8080/posts
+
+###
+
+GET http://localhost:8080/posts?sender=stavby
+
+###
+
+GET http://localhost:8080/posts/6740aa79f7d3b27e1b049770
+
+###
+
+PUT http://localhost:8080/posts/6740aa79f7d3b27e1b049770
+Content-Type: application/json
+
+{
+"content": "Posting is soooo much fun!!!\nAlso I'm Stav!"
+}
