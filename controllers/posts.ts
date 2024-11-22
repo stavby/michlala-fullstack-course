@@ -1,12 +1,12 @@
 import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
-import { postModel } from '../models/posts';
 import { isValidObjectId } from 'mongoose';
+import { postModel } from '../models/posts';
 
 export const createPost = async (request: Request, response: Response, next: NextFunction) => {
-    try {
-        const postBody = request.body;
+    const postBody = request.body;
 
+    try {
         const post = await postModel.create(postBody);
         response.status(httpStatus.CREATED).send(post);
     } catch (error) {
@@ -25,11 +25,11 @@ export const createPost = async (request: Request, response: Response, next: Nex
     }
 };
 
-export const getAllPosts = async (request: Request<{}, {}, {}, { sender: string }>, response: Response, next: NextFunction) => {
+export const getAllPosts = async (request: Request<{}, {}, {}, { sender?: string }>, response: Response, next: NextFunction) => {
     try {
         const { sender } = request.query;
 
-        const posts = !!sender ? await postModel.find({ sender }) : await postModel.find();
+        const posts = await postModel.find(!!sender ? { sender } : {});
         response.status(httpStatus.OK).send(posts);
     } catch (error) {
         next(error);
@@ -78,7 +78,7 @@ export const updatePostById = async (request: Request<{ id: string }>, response:
     }
 };
 
-export const postsErrorHandler: ErrorRequestHandler = (error, request, response, _next) => {
-    console.error(`An error occured in posts router at ${request.method} ${request.url} - `, (error as Error).message);
+export const errorHandler: ErrorRequestHandler = (error: Error, request, response, _next) => {
+    console.error(`An error occured in posts router at ${request.method} ${request.url} - `, error.message);
     response.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal server error');
 };
