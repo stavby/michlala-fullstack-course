@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { isValidObjectId } from 'mongoose';
 import { commentModel } from '../models/comments';
@@ -15,7 +15,7 @@ export const createComment = async (request: Request, response: Response, next: 
 	}
 };
 
-export const getComments = async (request: Request, response: Response, next: NextFunction) => {
+export const getComments = async (_request: Request, response: Response, next: NextFunction) => {
 	try {
 		const comments = await commentModel.find();
 		response.status(httpStatus.OK).send(comments);
@@ -24,8 +24,8 @@ export const getComments = async (request: Request, response: Response, next: Ne
 	}
 };
 
-export const getCommentById = async (request: Request, response: Response, next: NextFunction) => {
-	const commentId = request.params.id;
+export const getCommentById = async (request: Request<{ id: string }>, response: Response, next: NextFunction) => {
+	const { id: commentId } = request.params;
 
 	if (!isValidObjectId(commentId)) {
 		response.status(httpStatus.BAD_REQUEST).send(`Invalid id ${commentId}`);
@@ -37,28 +37,41 @@ export const getCommentById = async (request: Request, response: Response, next:
 
 		if (!comment) {
 			response.status(httpStatus.NOT_FOUND).send(`comment ${commentId} not found`);
+			return;
 		}
+
 		response.status(httpStatus.OK).send(comment);
 	} catch (error) {
 		next(error);
 	}
 };
 
-export const updateCommentById = async (request: Request, response: Response, next: NextFunction) => {
-	const commentId = request.params.id
+export const updateCommentById = async (request: Request<{ id: string }>, response: Response, next: NextFunction) => {
+	const { id: commentId } = request.params
 	const data = request.body;
 
+	if (!isValidObjectId(commentId)) {
+		response.status(httpStatus.BAD_REQUEST).send(`Invalid id ${commentId}`);
+		return;
+	}
+
 	try {
-		await commentModel.updateOne({ _id: commentId }, data);
-		response.status(httpStatus.OK).send(`comment ${commentId} updated`);
+		const updateResponse = await commentModel.updateOne({ _id: commentId }, data);
+
+        if (updateResponse.matchedCount === 0) {
+            response.status(httpStatus.NOT_FOUND).send(`Comment with id ${commentId} not found`);
+            return;
+        }
+
+		response.status(httpStatus.OK).send(`Comment ${commentId} updated`);
 	} catch (error) {
 		next(error);
 	}
 };
 
 
-export const deleteCommentById = async (request: Request, response: Response, next: NextFunction) => {
-	const commentId = request.params.id;
+export const deleteCommentById = async (request: Request<{ id: string }>, response: Response, next: NextFunction) => {
+	const { id: commentId } = request.params;
 
 	try {
 		await commentModel.deleteOne({ _id: commentId });
@@ -68,7 +81,7 @@ export const deleteCommentById = async (request: Request, response: Response, ne
 	}
 };
 
-export const errorHandler = (error: Error, request: Request, response: Response, _next: NextFunction) => {
+export const errorHandler: ErrorRequestHandler = (error: Error, request: Request, response: Response, _next: NextFunction) => {
 	console.error(`An error occured in comments router at ${request.method} ${request.url} - ${error.message}`)
 
 	if (error.name === 'ValidationError') {
