@@ -17,7 +17,7 @@ export const createPost = async (request: Request, response: Response, next: Nex
                 errors[key] = (error as any).errors[key].message;
             });
 
-            response.status(400).send({ errors });
+            response.status(httpStatus.BAD_REQUEST).send({ errors });
             return;
         }
 
@@ -30,7 +30,7 @@ export const getAllPosts = async (request: Request<{}, {}, {}, { sender: string 
         const { sender } = request.query;
 
         const posts = !!sender ? await postModel.find({ sender }) : await postModel.find();
-        response.send(posts);
+        response.status(httpStatus.OK).send(posts);
     } catch (error) {
         next(error);
     }
@@ -51,7 +51,7 @@ export const getPostById = async (request: Request<{ id: string }>, response: Re
             return;
         }
 
-        response.send(post);
+        response.status(httpStatus.OK).send(post);
     } catch (error) {
         next(error);
     }
