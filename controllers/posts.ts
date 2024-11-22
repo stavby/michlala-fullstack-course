@@ -1,38 +1,84 @@
-import { Request, Response, ErrorRequestHandler } from 'express';
-import { postModel } from '../models/posts';
+import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
+import { postModel } from '../models/posts';
+import { isValidObjectId } from 'mongoose';
 
-export const getAllPosts = async (req: Request<{}, {}, {}, { owner: string }>, res: Response) => {
-    const { owner } = req.query;
+export const createPost = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const postBody = req.body;
 
-    if (owner) {
-        const posts = await postModel.find({ owner });
-        res.send(posts);
-    } else {
-        const posts = await postModel.find();
-        res.send(posts);
+        const post = await postModel.create(postBody);
+        res.status(httpStatus.CREATED).send(post);
+    } catch (error) {
+        if ((error as Error).name === 'ValidationError') {
+            const errors: { [field: string]: string } = {};
+
+            Object.keys((error as any).errors).forEach((key) => {
+                errors[key] = (error as any).errors[key].message;
+            });
+
+            res.status(400).send({ errors });
+            return;
+        }
+
+        next(error);
     }
 };
 
-export const getPostById = async (req: Request<{ id: string }>, res: Response) => {
-    const { id: postId } = req.params;
+export const getAllPosts = async (req: Request<{}, {}, {}, { sender: string }>, res: Response, next: NextFunction) => {
+    try {
+        const { sender } = req.query;
 
-    const post = await postModel.findById(postId);
-    if (post) {
+        const posts = !!sender ? await postModel.find({ sender }) : await postModel.find();
+        res.send(posts);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getPostById = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+    try {
+        const { id: postId } = req.params;
+
+        if (!isValidObjectId(postId)) {
+            res.status(httpStatus.BAD_REQUEST).send('Invalid id');
+            return;
+        }
+
+        const post = await postModel.findById(postId);
+        if (!post) {
+            res.status(httpStatus.NOT_FOUND).send(`Post with id ${postId} not found`);
+            return;
+        }
+
         res.send(post);
-    } else {
-        res.status(httpStatus.NOT_FOUND).send(`Post with id ${postId} not found`);
+    } catch (error) {
+        next(error);
     }
 };
 
-export const createPost = async (req: Request, res: Response) => {
-    const postBody = req.body;
+export const updatePostById = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+    try {
+        const { id: postId } = req.params;
 
-    const post = await postModel.create(postBody);
-    res.status(httpStatus.CREATED).send(post);
+        if (!isValidObjectId(postId)) {
+            res.status(httpStatus.BAD_REQUEST).send('Invalid id');
+            return;
+        }
+
+        const updateResponse = await postModel.updateOne({ _id: postId }, req.body);
+        if (updateResponse.matchedCount === 0) {
+            res.status(httpStatus.NOT_FOUND).send(`Post with id ${postId} not found`);
+            return;
+        }
+
+        res.status(httpStatus.OK).send('Updated successfully');
+    } catch (error) {
+        next(error);
+    }
 };
 
-export const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
-    console.error(`An error occured in posts router at ${req.url}: `, (error as Error).message);
+export const postsErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
+    console.error(`An error occured in posts router at ${req.method} ${req.url} - `, (error as Error).message);
     res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal server error');
 };
