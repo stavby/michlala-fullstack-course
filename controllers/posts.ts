@@ -2,6 +2,7 @@ import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { isValidObjectId } from 'mongoose';
 import { postModel } from '../models/posts';
+import { formatValidationError } from '../utils/formatValidationError';
 
 export const createPost = async (request: Request, response: Response, next: NextFunction) => {
     const postBody = request.body;
@@ -10,17 +11,6 @@ export const createPost = async (request: Request, response: Response, next: Nex
         const post = await postModel.create(postBody);
         response.status(httpStatus.CREATED).send(post);
     } catch (error) {
-        if ((error as Error).name === 'ValidationError') {
-            const errors: { [field: string]: string } = {};
-
-            Object.keys((error as any).errors).forEach((key) => {
-                errors[key] = (error as any).errors[key].message;
-            });
-
-            response.status(httpStatus.BAD_REQUEST).send({ errors });
-            return;
-        }
-
         next(error);
     }
 };
@@ -79,6 +69,11 @@ export const updatePostById = async (request: Request<{ id: string }>, response:
 };
 
 export const errorHandler: ErrorRequestHandler = (error: Error, request, response, _next) => {
+    if (error.name === 'ValidationError') {
+        response.status(httpStatus.BAD_REQUEST).send(formatValidationError(error));
+        return;
+    }
+
     console.error(`An error occured in posts router at ${request.method} ${request.url} - `, error.message);
     response.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal server error');
 };
