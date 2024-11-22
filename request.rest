@@ -27,3 +27,37 @@ Content-Type: application/json
 {
 "content": "Posting is soooo much fun!!!\nAlso I'm Stav!"
 }
+
+###
+
+POST http://localhost:8080/comments
+Content-Type: application/json
+
+{
+"sender": "yaron", "content": "hi! my first comment!"
+}
+
+###
+
+GET http://localhost:8080/comments
+
+###
+
+GET http://localhost:8080/comments?sender=yaron
+
+###
+
+GET http://localhost:8080/comments/6740bc6daa86a22352cb55dd
+
+###
+
+PUT http://localhost:8080/comments/6740bc6daa86a22352cb55dd
+Content-Type: application/json
+
+{
+"content": "maybe this is my second comment?"
+}
+
+###
+
+DELETE http://localhost:8080/comments/6740bc6daa86a22352cb55dd
