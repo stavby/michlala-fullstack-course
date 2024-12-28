@@ -80,6 +80,14 @@ describe('Comments API', () => {
 
 			await request(app).get(`/comments/${commentId}`).expect(httpStatus.NOT_FOUND);
 		});
+
+		it('should filter comments by sender', async () => {
+			const response = await request(app).get('/comments').query({ sender: 'testuser' }).expect(httpStatus.OK);
+
+			expect(Array.isArray(response.body)).toBe(true);
+			expect(response.body.length).toBeGreaterThan(0);
+			expect(response.body.every(({ sender }: Comment) => sender === 'testuser')).toBe(true);
+		});
 	});
 
 	describe('Negative tests', () => {
@@ -106,6 +114,29 @@ describe('Comments API', () => {
 			expect(response.text).toBe('Invalid post id "invalid-post-id"');
 		});
 
+		it('should return 400 for getting comments with invalid post id filter', async () => {
+			const response = await request(app).get('/comments').query({ postId: 'invalid-post-id' }).expect(httpStatus.BAD_REQUEST);
+
+			expect(response.text).toBe('Invalid post id "invalid-post-id"');
+		});
+
+		it('should return 400 for updating a comment with invalid id', async () => {
+			const response = await request(app)
+				.put('/comments/invalid-id')
+				.send({
+					content: 'Updated comment content',
+				})
+				.expect(httpStatus.BAD_REQUEST);
+
+			expect(response.text).toBe('Invalid id "invalid-id"');
+		});
+
+		it('should return 400 for deleting a comment with invalid id', async () => {
+			const response = await request(app).delete('/comments/invalid-id').expect(httpStatus.BAD_REQUEST);
+
+			expect(response.text).toBe('Invalid id "invalid-id"');
+		});
+
 		it('should return 400 for creating a comment with non-existing post id', async () => {
 			const response = await request(app)
 				.post('/comments')
@@ -117,6 +148,29 @@ describe('Comments API', () => {
 				.expect(httpStatus.BAD_REQUEST);
 
 			expect(response.text).toBe("Post with id 6740bcfcaa86a22352cb55e3 doesn't exist");
+		});
+
+		it('should return 400 for empty body', async () => {
+			await request(app).put(`/comments/${commentId}`).expect(httpStatus.BAD_REQUEST);
+		});
+
+		it('should return 400 for empty object body', async () => {
+			await request(app).put(`/comments/${commentId}`).send({}).expect(httpStatus.BAD_REQUEST);
+		});
+
+		it('should return 404 for updating a non-existing comment', async () => {
+			const nonExistingId = '6740bcfcaa86a22352cb55e2';
+			await request(app)
+				.put(`/comments/${nonExistingId}`)
+				.send({
+					content: 'Updated comment content',
+				})
+				.expect(httpStatus.NOT_FOUND);
+		});
+
+		it('should return 404 for deleting a non-existing comment', async () => {
+			const nonExistingId = '6740bcfcaa86a22352cb55e2';
+			await request(app).delete(`/comments/${nonExistingId}`).expect(httpStatus.NOT_FOUND);
 		});
 
 		it('should return 400 for missing sender', async () => {

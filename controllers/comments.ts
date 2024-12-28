@@ -36,7 +36,7 @@ export const getComments = async (
 	const { postId } = request.query;
 
 	if (!!postId && !isValidObjectId(postId)) {
-		response.status(httpStatus.BAD_REQUEST).send(`Invalid id ${postId}`);
+		response.status(httpStatus.BAD_REQUEST).send(`Invalid post id "${postId}"`);
 		return;
 	}
 
@@ -56,7 +56,7 @@ export const getCommentById = async (request: Request<{ id: string }>, response:
 	const { id: commentId } = request.params;
 
 	if (!isValidObjectId(commentId)) {
-		response.status(httpStatus.BAD_REQUEST).send(`Invalid id ${commentId}`);
+		response.status(httpStatus.BAD_REQUEST).send(`Invalid id "${commentId}"`);
 		return;
 	}
 
@@ -79,7 +79,11 @@ export const updateCommentById = async (request: Request<{ id: string }>, respon
 	const data = request.body;
 
 	if (!isValidObjectId(commentId)) {
-		response.status(httpStatus.BAD_REQUEST).send(`Invalid id ${commentId}`);
+		response.status(httpStatus.BAD_REQUEST).send(`Invalid id "${commentId}"`);
+		return;
+	}
+	if (Object.keys(data || {}).length === 0) {
+		response.status(httpStatus.BAD_REQUEST).send('No update fields provided');
 		return;
 	}
 
@@ -99,6 +103,11 @@ export const updateCommentById = async (request: Request<{ id: string }>, respon
 
 export const deleteCommentById = async (request: Request<{ id: string }>, response: Response, next: NextFunction) => {
 	const { id: commentId } = request.params;
+
+	if (!isValidObjectId(commentId)) {
+		response.status(httpStatus.BAD_REQUEST).send(`Invalid id "${commentId}"`);
+		return;
+	}
 
 	try {
 		const deleteResponse = await commentModel.findByIdAndDelete({ _id: commentId });
