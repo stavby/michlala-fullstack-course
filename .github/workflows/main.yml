@@ -44,7 +44,7 @@ jobs:
                     user: 'admin',
                     pwd: 'admin',
                     roles: [{ role: 'readWrite', db: 'michlala' }]
-                });
+                }, { w: "majority" });
                 db.createCollection('users');
                 db.createCollection('posts');
                 db.createCollection('comments');
