@@ -8,7 +8,7 @@ on:
 jobs:
     test:
         env:
-            DB_URL: mongodb://admin:admin@localhost:27017/APP_DB
+            DB_URL: mongodb://admin:admin@localhost:27017/APP-DB
         runs-on: ubuntu-latest
 
         services:
