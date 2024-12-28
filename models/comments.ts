@@ -1,6 +1,7 @@
-import { Schema, model } from 'mongoose';
+import { InferRawDocType, Schema, model } from 'mongoose';
+import { TypeWithId } from '../utils/types';
 
-const commentSchema = new Schema({
+const commentSchemaDefinition = {
 	sender: {
 		type: String,
 		required: true,
@@ -12,7 +13,11 @@ const commentSchema = new Schema({
 	postId: {
 		type: Schema.Types.ObjectId,
 		required: true,
-	}
-});
+	},
+} as const;
+
+const commentSchema = new Schema(commentSchemaDefinition);
 
 export const commentModel = model('comments', commentSchema);
+
+export type Comment = TypeWithId<InferRawDocType<typeof commentSchemaDefinition>>;
