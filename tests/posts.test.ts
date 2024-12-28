@@ -62,17 +62,45 @@ describe('Posts API', () => {
 
 			expect(updatedPostResponse.body.content).toBe('Updated content');
 		});
+
+		it('should filter posts by sender', async () => {
+			const response = await request(app).get('/posts').query({ sender: 'testuser' }).expect(httpStatus.OK);
+
+			expect(Array.isArray(response.body)).toBe(true);
+			expect(response.body.length).toBeGreaterThan(0);
+			expect(response.body.every(({ sender }: Post) => sender === 'testuser')).toBe(true);
+		});
 	});
 
 	describe('Negative tests', () => {
-		it('should return 404 for non-existing post id', async () => {
+		it('should return 404 for getting non-existing post id', async () => {
 			const nonExistingId = '6740aa79f7d3b27e1b049771';
 			await request(app).get(`/posts/${nonExistingId}`).expect(httpStatus.NOT_FOUND);
 		});
 
-		it('should return 400 for invalid post id', async () => {
+		it('should return 400 for getting with invalid post id', async () => {
 			const invalidId = 'invalid-id';
 			await request(app).get(`/posts/${invalidId}`).expect(httpStatus.BAD_REQUEST);
+		});
+
+		it('should return 400 for updating post with invalid id', async () => {
+			const invalidId = 'invalid-id';
+			await request(app)
+				.put(`/posts/${invalidId}`)
+				.send({
+					content: 'Updated content',
+				})
+				.expect(httpStatus.BAD_REQUEST);
+		});
+
+		it('should return 404 for updating non-existing post id', async () => {
+			const nonExistingId = '6740aa79f7d3b27e1b049771';
+			await request(app)
+				.put(`/posts/${nonExistingId}`)
+				.send({
+					content: 'Updated content',
+				})
+				.expect(httpStatus.NOT_FOUND);
 		});
 
 		it('should return 400 for missing title', async () => {
