@@ -11,8 +11,8 @@ export const createComment = async (request: Request, response: Response, next: 
 	try {
 		const { postId } = data;
 
-		if (!!postId && !isValidObjectId(postId)) {
-			response.status(httpStatus.BAD_REQUEST).send(`Invalid id ${postId}`);
+		if (!postId || !isValidObjectId(postId)) {
+			response.status(httpStatus.BAD_REQUEST).send(`Invalid post id "${postId || '(empty)'}"`);
 			return;
 		}
 		const postExists = await postModel.exists({ _id: postId });
