@@ -14,7 +14,11 @@ describe('Users API', () => {
 		let userId: string; // Need to take care of this after adding registartion route
 
 		beforeAll(async () => {
-			const response = await request(app).get('/users').query({ username: 'testuser' }).send();
+			const response = await request(app).post('/users').send({
+				username: 'testuser',
+				email: 'testuser@example.com',
+				password: 'password',
+			});
 	
 			userId = response.body._id;
 		});
@@ -43,7 +47,7 @@ describe('Users API', () => {
 				})
 				.expect(httpStatus.OK);
 
-			expect(response.text).toBe('Updated successfully');
+			expect(response.text).toBe(`User ${userId} updated`);
 
 			const updatedUserResponse = await request(app).get(`/users/${userId}`).expect(httpStatus.OK);
 

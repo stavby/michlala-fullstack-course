@@ -1,13 +1,20 @@
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { isValidObjectId } from 'mongoose';
-import { UserDetails, userModel } from '../models/users';
+import { User, UserDetails, userModel } from '../models/users';
 
-export const getUserByDetails = async (
-	request: Request<{}, {}, {}, Partial<UserDetails>>,
-	response: Response,
-	next: NextFunction
-) => {
+export const createUser = async (request: Request<{}, {}, Omit<User, '_id'>, {}>, response: Response, next: NextFunction) => {
+	const data = request.body;
+
+	try {
+		const newUser = await userModel.create(data);
+		response.status(httpStatus.CREATED).send({ ...newUser.toJSON(), password: undefined });
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const getUserByDetails = async (request: Request<{}, {}, {}, Partial<UserDetails>>, response: Response, next: NextFunction) => {
 	const filters = Object.entries(request.query)
 		.filter(([key]) => Object.keys(userModel.schema.obj).includes(key))
 		.reduce((previous, [key, value]) => ({ ...previous, [key]: value }), {});

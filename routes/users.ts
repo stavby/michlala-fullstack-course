@@ -1,10 +1,12 @@
 import express from 'express';
-import { getUserByDetails, updateUserById, deleteUserById } from '../controllers/users';
+import { getUserByDetails, getUserById, updateUserById, deleteUserById, createUser } from '../controllers/users';
 import { createErrorHandler } from '../utils/createErrorHandler';
 
 export const usersRouter = express.Router();
 
+usersRouter.post('/', createUser);
 usersRouter.get('/', getUserByDetails);
+usersRouter.get('/:id', getUserById);
 usersRouter.put('/:id', updateUserById);
 usersRouter.delete('/:id', deleteUserById);
 usersRouter.use(createErrorHandler('users'));
