@@ -3,17 +3,6 @@ import httpStatus from 'http-status';
 import { isValidObjectId } from 'mongoose';
 import { userModel } from '../models/users';
 
-export const createUser = async (request: Request, response: Response, next: NextFunction) => {
-	const data = request.body;
-
-	try {
-		const newUser = await userModel.create(data);
-		response.status(httpStatus.CREATED).send({ ...newUser, password: undefined });
-	} catch (error) {
-		next(error);
-	}
-};
-
 export const getUsers = async (
 	request: Request<{}, {}, {}, { userId?: string; username?: string; email?: string; password: never }>,
 	response: Response,
@@ -55,7 +44,7 @@ export const updateUserById = async (request: Request<{ id: string }>, response:
 	try {
 		const updatedUser = await userModel.findByIdAndUpdate({ _id: userId }, data).select('-password');
 
-		if (updatedUser === null) {
+		if (!updatedUser) {
 			response.status(httpStatus.NOT_FOUND).send(`User with id ${userId} not found`);
 			return;
 		}

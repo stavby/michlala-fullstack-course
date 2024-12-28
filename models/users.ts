@@ -1,6 +1,6 @@
-import { Schema, model } from 'mongoose';
+import { InferRawDocType, Schema, model } from 'mongoose';
 
-const userSchema = new Schema({
+const userSchemaDefinition = {
 	username: {
 		type: String,
 		required: true,
@@ -13,6 +13,10 @@ const userSchema = new Schema({
 		type: String,
 		required: true,
 	},
-});
+} as const;
+
+const userSchema = new Schema(userSchemaDefinition);
 
 export const userModel = model('users', userSchema);
+
+export type User = InferRawDocType<typeof userSchemaDefinition>;
