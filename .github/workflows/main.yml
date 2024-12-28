@@ -38,7 +38,7 @@ jobs:
             
             - name: Initalize MongoDB
               run: |
-                mongosh --host localhost:27017 -u admin -p admin --authenticationDatabase admin <<EOF
+                mongosh --host localhost:27017 -u admin -p admin <<EOF
                 db.createCollection('users');
                 db.createCollection('posts');
                 db.createCollection('comments');
