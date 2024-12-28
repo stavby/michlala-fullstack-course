@@ -8,6 +8,18 @@ export const createComment = async (request: Request, response: Response, next: 
 	const data = request.body;
 
 	try {
+		const { postId } = data;
+
+		if (!!postId && !isValidObjectId(postId)) {
+			response.status(httpStatus.BAD_REQUEST).send(`Invalid id ${postId}`);
+			return;
+		}
+		const postExists = await commentModel.exists({ _id: postId });
+		if (!postExists) {
+			response.status(httpStatus.BAD_REQUEST).send(`Post with id ${postId} doesn't exist`);
+			return;
+		}
+
 		const newComment = await commentModel.create(data);
 		response.status(httpStatus.CREATED).send(newComment);
 	} catch (error) {
@@ -15,7 +27,11 @@ export const createComment = async (request: Request, response: Response, next: 
 	}
 };
 
-export const getComments = async (request: Request<{}, {}, {}, { sender?: string, postId?: string }>, response: Response, next: NextFunction) => {
+export const getComments = async (
+	request: Request<{}, {}, {}, { sender?: string; postId?: string }>,
+	response: Response,
+	next: NextFunction
+) => {
 	const { postId } = request.query;
 
 	if (!!postId && !isValidObjectId(postId)) {
@@ -58,7 +74,7 @@ export const getCommentById = async (request: Request<{ id: string }>, response:
 };
 
 export const updateCommentById = async (request: Request<{ id: string }>, response: Response, next: NextFunction) => {
-	const { id: commentId } = request.params
+	const { id: commentId } = request.params;
 	const data = request.body;
 
 	if (!isValidObjectId(commentId)) {
@@ -79,7 +95,6 @@ export const updateCommentById = async (request: Request<{ id: string }>, respon
 		next(error);
 	}
 };
-
 
 export const deleteCommentById = async (request: Request<{ id: string }>, response: Response, next: NextFunction) => {
 	const { id: commentId } = request.params;
@@ -102,6 +117,6 @@ export const errorHandler: ErrorRequestHandler = (error: Error, request: Request
 		return;
 	}
 
-	console.error(`An error occured in comments router at ${request.method} ${request.url} - ${error.message}`)
+	console.error(`An error occured in comments router at ${request.method} ${request.url} - ${error.message}`);
 	response.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal server error');
 };
