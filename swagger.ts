@@ -14,4 +14,4 @@ const options: Options = {
 
 const swaggerSpec = swaggerJsdoc(options);
 
-export const swagger = { serve: serve, setup: setup(swaggerSpec) };
+export const swagger = { serve, setup: setup(swaggerSpec) };
