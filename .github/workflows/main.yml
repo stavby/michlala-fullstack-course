@@ -7,7 +7,8 @@ on:
 
 jobs:
     test:
-        runs-on: ubuntu-latest
+		runs-on: ubuntu-latest
+		
 		steps:
 			- name: Install mongosh
 				run: |
@@ -27,7 +28,7 @@ jobs:
 						db.createCollection('posts');
 						db.createCollection('comments');
 					EOF
-					
+
 			- name: Checkout repository
 				uses: actions/checkout@v2
 
