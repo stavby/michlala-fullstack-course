@@ -18,12 +18,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 startDB();
 
 app.get('/isAlive', (_request: Request, response: Response) => {
-    response.status(httpStatus.OK).send('Server is alive!');
+	response.status(httpStatus.OK).send('Server is alive!');
 });
 app.use('/posts', postsRouter);
 app.use('/comments', commentsRouter);
 app.use('/users', usersRouter);
 
-export const server = app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}!`);
-});
+if (process.env.NODE_ENV !== 'test') {
+	app.listen(PORT, () => {
+		console.log(`Server is running on port ${PORT}!`);
+	});
+}
