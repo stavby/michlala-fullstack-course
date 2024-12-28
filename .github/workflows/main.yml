@@ -8,7 +8,7 @@ on:
 jobs:
     test:
         env:
-            DB_URL: mongodb://localhost:27017/APP-DB
+            DB_URL: mongodb://localhost:27017/michlala
         runs-on: ubuntu-latest
 
         services:
@@ -17,7 +17,7 @@ jobs:
                 env:
                     MONGO_INITDB_ROOT_USERNAME: admin
                     MONGO_INITDB_ROOT_PASSWORD: admin
-                    MONGO_INITDB_DATABASE: APP-DATABASE
+                    MONGO_INITDB_DATABASE: michlala
                 ports:
                     - 27017:27017
                 options: >-
@@ -39,8 +39,6 @@ jobs:
             - name: Initalize MongoDB
               run: |
                 mongosh --host localhost:27017 -u admin -p admin --authenticationDatabase admin <<EOF
-                db = db.getSiblingDB('APP-DB');
-                db.createUser({ user: 'APP-USERNAME', pwd: 'APP-PASSWORD', roles: [{ role: 'readWrite', db: 'APP-DB' }] })
                 db.createCollection('users');
                 db.createCollection('posts');
                 db.createCollection('comments');
