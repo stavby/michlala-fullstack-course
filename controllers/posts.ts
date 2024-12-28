@@ -26,14 +26,14 @@ export const getAllPosts = async (request: Request<{}, {}, {}, { sender?: string
 };
 
 export const getPostById = async (request: Request<{ id: string }>, response: Response, next: NextFunction) => {
+	const { id: postId } = request.params;
+
+	if (!isValidObjectId(postId)) {
+		response.status(httpStatus.BAD_REQUEST).send('Invalid id');
+		return;
+	}
+
 	try {
-		const { id: postId } = request.params;
-
-		if (!isValidObjectId(postId)) {
-			response.status(httpStatus.BAD_REQUEST).send('Invalid id');
-			return;
-		}
-
 		const post = await postModel.findById(postId);
 		if (!post) {
 			response.status(httpStatus.NOT_FOUND).send(`Post with id ${postId} not found`);
