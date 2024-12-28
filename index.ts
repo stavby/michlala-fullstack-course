@@ -9,7 +9,7 @@ import { startDB } from './services/db';
 dotenv.config();
 
 const PORT = process.env.PORT || '8080';
-const app = express();
+export const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -22,6 +22,6 @@ app.get('/isAlive', (_request: Request, response: Response) => {
 app.use('/posts', postsRouter);
 app.use('/comments', commentsRouter);
 
-app.listen(PORT, () => {
+export const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}!`);
 });
