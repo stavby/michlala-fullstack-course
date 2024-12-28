@@ -1,3 +1,6 @@
+import { InferRawDocType, Schema, model } from 'mongoose';
+import { TypeWithId } from '../utils/types';
+
 /**
  * @swagger
  * components:
@@ -24,8 +27,6 @@
  *         content: "This is a comment."
  *         postId: "60d21b4667d0d8992e610c85"
  */
-import { InferRawDocType, Schema, model } from 'mongoose';
-import { TypeWithId } from '../utils/types';
 
 const commentSchemaDefinition = {
 	sender: {
