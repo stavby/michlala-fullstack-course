@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import { isValidObjectId } from 'mongoose';
 import { commentModel } from '../models/comments';
 import { formatValidationError } from '../utils/formatValidationError';
+import { postModel } from '../models/posts';
 
 export const createComment = async (request: Request, response: Response, next: NextFunction) => {
 	const data = request.body;
@@ -14,7 +15,7 @@ export const createComment = async (request: Request, response: Response, next: 
 			response.status(httpStatus.BAD_REQUEST).send(`Invalid id ${postId}`);
 			return;
 		}
-		const postExists = await commentModel.exists({ _id: postId });
+		const postExists = await postModel.exists({ _id: postId });
 		if (!postExists) {
 			response.status(httpStatus.BAD_REQUEST).send(`Post with id ${postId} doesn't exist`);
 			return;
