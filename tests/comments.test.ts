@@ -73,20 +73,35 @@ describe('Comments API', () => {
 			expect(updatedCommentResponse.body.content).toBe('Updated comment content');
 		});
 
-		it('should delete a comment by id', async () => {
-			const response = await request(app).delete(`/comments/${commentId}`).expect(httpStatus.OK);
-
-			expect(response.text).toBe(`comment ${commentId} deleted`);
-
-			await request(app).get(`/comments/${commentId}`).expect(httpStatus.NOT_FOUND);
-		});
-
 		it('should filter comments by sender', async () => {
 			const response = await request(app).get('/comments').query({ sender: 'testuser' }).expect(httpStatus.OK);
 
 			expect(Array.isArray(response.body)).toBe(true);
 			expect(response.body.length).toBeGreaterThan(0);
 			expect(response.body.every(({ sender }: Comment) => sender === 'testuser')).toBe(true);
+		});
+
+		it('should filter comments by post id', async () => {
+			const response = await request(app).get('/comments').query({ postId }).expect(httpStatus.OK);
+
+			expect(Array.isArray(response.body)).toBe(true);
+			expect(response.body.length).toBeGreaterThan(0);
+			expect(response.body.every(({ postId: id }: Comment) => (id as unknown as string) === postId)).toBe(true);
+		});
+
+		it('should filter comments by non-existent post id', async () => {
+			const nonExistentPostId = '6740bcfcaa86a22352cb55e3';
+			const response = await request(app).get('/comments').query({ postId: nonExistentPostId }).expect(httpStatus.OK);
+
+			expect(response.body).toEqual([]);
+		});
+
+		it('should delete a comment by id', async () => {
+			const response = await request(app).delete(`/comments/${commentId}`).expect(httpStatus.OK);
+
+			expect(response.text).toBe(`comment ${commentId} deleted`);
+
+			await request(app).get(`/comments/${commentId}`).expect(httpStatus.NOT_FOUND);
 		});
 	});
 

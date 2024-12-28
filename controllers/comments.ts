@@ -8,19 +8,19 @@ import { postModel } from '../models/posts';
 export const createComment = async (request: Request, response: Response, next: NextFunction) => {
 	const data = request.body;
 
+	const { postId } = data;
+
+	if (!postId || !isValidObjectId(postId)) {
+		response.status(httpStatus.BAD_REQUEST).send(`Invalid post id "${postId || '(empty)'}"`);
+		return;
+	}
+	const postExists = await postModel.exists({ _id: postId });
+	if (!postExists) {
+		response.status(httpStatus.BAD_REQUEST).send(`Post with id ${postId} doesn't exist`);
+		return;
+	}
+
 	try {
-		const { postId } = data;
-
-		if (!postId || !isValidObjectId(postId)) {
-			response.status(httpStatus.BAD_REQUEST).send(`Invalid post id "${postId || '(empty)'}"`);
-			return;
-		}
-		const postExists = await postModel.exists({ _id: postId });
-		if (!postExists) {
-			response.status(httpStatus.BAD_REQUEST).send(`Post with id ${postId} doesn't exist`);
-			return;
-		}
-
 		const newComment = await commentModel.create(data);
 		response.status(httpStatus.CREATED).send(newComment);
 	} catch (error) {
