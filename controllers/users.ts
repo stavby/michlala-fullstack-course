@@ -1,8 +1,7 @@
-import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { isValidObjectId } from 'mongoose';
 import { userModel } from '../models/users';
-import { formatValidationError } from '../utils/formatValidationError';
 
 export const createUser = async (request: Request, response: Response, next: NextFunction) => {
 	const data = request.body;
@@ -80,14 +79,4 @@ export const deleteUserById = async (request: Request<{ id: string }>, response:
 	} catch (error) {
 		next(error);
 	}
-};
-
-export const errorHandler: ErrorRequestHandler = (error: Error, request: Request, response: Response, _next: NextFunction) => {
-	if (error.name === 'ValidationError') {
-		response.status(httpStatus.BAD_REQUEST).send(formatValidationError(error));
-		return;
-	}
-
-	console.error(`An error occured in users router at ${request.method} ${request.url} - ${error.message}`);
-	response.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal server error');
 };

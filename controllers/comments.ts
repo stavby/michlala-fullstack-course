@@ -1,8 +1,7 @@
-import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { isValidObjectId } from 'mongoose';
 import { commentModel } from '../models/comments';
-import { formatValidationError } from '../utils/formatValidationError';
 
 export const createComment = async (request: Request, response: Response, next: NextFunction) => {
 	const data = request.body;
@@ -15,7 +14,11 @@ export const createComment = async (request: Request, response: Response, next: 
 	}
 };
 
-export const getComments = async (request: Request<{}, {}, {}, { sender?: string, postId?: string }>, response: Response, next: NextFunction) => {
+export const getComments = async (
+	request: Request<{}, {}, {}, { sender?: string; postId?: string }>,
+	response: Response,
+	next: NextFunction
+) => {
 	const { postId } = request.query;
 
 	if (!!postId && !isValidObjectId(postId)) {
@@ -58,7 +61,7 @@ export const getCommentById = async (request: Request<{ id: string }>, response:
 };
 
 export const updateCommentById = async (request: Request<{ id: string }>, response: Response, next: NextFunction) => {
-	const { id: commentId } = request.params
+	const { id: commentId } = request.params;
 	const data = request.body;
 
 	if (!isValidObjectId(commentId)) {
@@ -80,7 +83,6 @@ export const updateCommentById = async (request: Request<{ id: string }>, respon
 	}
 };
 
-
 export const deleteCommentById = async (request: Request<{ id: string }>, response: Response, next: NextFunction) => {
 	const { id: commentId } = request.params;
 
@@ -94,14 +96,4 @@ export const deleteCommentById = async (request: Request<{ id: string }>, respon
 	} catch (error) {
 		next(error);
 	}
-};
-
-export const errorHandler: ErrorRequestHandler = (error: Error, request: Request, response: Response, _next: NextFunction) => {
-	if (error.name === 'ValidationError') {
-		response.status(httpStatus.BAD_REQUEST).send(formatValidationError(error));
-		return;
-	}
-
-	console.error(`An error occured in comments router at ${request.method} ${request.url} - ${error.message}`)
-	response.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal server error');
 };
