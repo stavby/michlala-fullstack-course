@@ -3,6 +3,12 @@ import { createPost, getAllPosts, getPostById, errorHandler, updatePostById } fr
 
 export const postsRouter = express.Router();
 
+postsRouter.post('/', createPost);
+postsRouter.get('/', getAllPosts);
+postsRouter.get('/:id', getPostById);
+postsRouter.put('/:id', updatePostById);
+postsRouter.use(errorHandler);
+
 /**
  * @swagger
  * /posts:
@@ -98,9 +104,3 @@ export const postsRouter = express.Router();
  *      400:
  *        description: The ID or request body is invalid
  */
-
-postsRouter.post('/', createPost);
-postsRouter.get('/', getAllPosts);
-postsRouter.get('/:id', getPostById);
-postsRouter.put('/:id', updatePostById);
-postsRouter.use(errorHandler);
