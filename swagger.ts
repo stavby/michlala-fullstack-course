@@ -1,7 +1,7 @@
-import swaggerJsdoc from 'swagger-jsdoc';
-import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc, { Options } from 'swagger-jsdoc';
+import { serve, setup } from 'swagger-ui-express';
 
-const options: swaggerJsdoc.Options = {
+const options: Options = {
 	definition: {
 		openapi: '3.0.0',
 		info: {
@@ -14,4 +14,4 @@ const options: swaggerJsdoc.Options = {
 
 const swaggerSpec = swaggerJsdoc(options);
 
-export const swagger = { serve: swaggerUi.serve, setup: swaggerUi.setup(swaggerSpec) };
+export const swagger = { serve: serve, setup: setup(swaggerSpec) };
