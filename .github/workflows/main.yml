@@ -21,7 +21,7 @@ jobs:
                 ports:
                     - 27017:27017
                 options: >-
-                    --health-cmd mongo
+                    --health-cmd "mongo --eval 'db.adminCommand({ ping: 1 })'"
                     --health-interval 10s
                     --health-timeout 5s
                     --health-retries 5
@@ -36,9 +36,15 @@ jobs:
                 sudo apt-get install -y mongodb-mongosh
                 mongosh --version
             
-            - name: Initalize MongoDB
+            - name: Initialize MongoDB
               run: |
-                mongosh --host localhost:27017 -u admin -p admin <<EOF
+                mongosh --host localhost:27017 <<EOF
+                use michlala;
+                db.createUser({
+                    user: 'admin',
+                    pwd: 'admin',
+                    roles: [{ role: 'readWrite', db: 'michlala' }]
+                });
                 db.createCollection('users');
                 db.createCollection('posts');
                 db.createCollection('comments');
