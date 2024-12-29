@@ -6,25 +6,28 @@ const userSchemaDefinition = {
 		type: String,
 		required: true,
 		unique: true,
+		allowFilter: true,
 	},
 	email: {
 		type: String,
 		required: true,
 		unique: true,
+		allowFilter: true,
 	},
 	password: {
 		type: String,
 		required: true,
+		allowFilter: false,
 	},
 } as const;
 
 const userSchema = new Schema(userSchemaDefinition);
 
+export const userAllowedFilters = Object.entries(userSchemaDefinition).filter(([, value]) => (value).allowFilter).map(([key]) => key);
+
 export const userModel = model('users', userSchema);
 
 export type User = TypeWithId<InferRawDocType<typeof userSchemaDefinition>>;
-
-export type UserDetails = Pick<User, 'password' | 'email'>;
 
 /**
  * @swagger

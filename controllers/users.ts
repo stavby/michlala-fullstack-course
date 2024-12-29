@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { isValidObjectId } from 'mongoose';
-import { User, UserDetails, userModel } from '../models/users';
+import { User, userAllowedFilters, userModel } from '../models/users';
 
 export const createUser = async (request: Request<{}, {}, Omit<User, '_id'>, {}>, response: Response, next: NextFunction) => {
 	const data = request.body;
@@ -14,9 +14,9 @@ export const createUser = async (request: Request<{}, {}, Omit<User, '_id'>, {}>
 	}
 };
 
-export const getUserByDetails = async (request: Request<{}, {}, {}, Partial<UserDetails>>, response: Response, next: NextFunction) => {
+export const getUserByDetails = async (request: Request<{}, {}, {}, Partial<User>>, response: Response, next: NextFunction) => {
 	const filters = Object.entries(request.query)
-		.filter(([key]) => Object.keys(userModel.schema.obj).includes(key))
+		.filter(([key]) => userAllowedFilters.includes(key))
 		.reduce((previous, [key, value]) => ({ ...previous, [key]: value }), {});
 
 	if (Object.entries(filters).length === 0) {
