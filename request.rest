@@ -65,3 +65,38 @@ Content-Type: application/json
 ###
 
 DELETE http://localhost:8080/comments/6740bc6daa86a22352cb55dd
+
+###
+
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+	"username": "shlomi", "password": "secretpassword123", "email": "shlomi@gmail.com"
+}
+
+###
+
+GET http://localhost:8080/users?username=shlomi
+
+###
+
+GET http://localhost:8080/users?email=shlomi@gmail.com
+
+
+###
+
+GET http://localhost:8080/users?userId=676fe19ab96f197a6f3ec8d1
+
+###
+
+PUT http://localhost:8080/users/676fe19ab96f197a6f3ec8d1
+Content-Type: application/json
+
+{
+"email": "shlominew@gmail.com"
+}
+
+###
+
+DELETE http://localhost:8080/users/676fe19ab96f197a6f3ec8d1
