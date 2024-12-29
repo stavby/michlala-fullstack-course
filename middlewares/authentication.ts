@@ -11,9 +11,7 @@ export const authenticationMiddleware = (request: Request, response: Response, n
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || '');
-		console.log(decoded);
-		console.log(`User authenticated with JWT`);
+        jwt.verify(token, process.env.JWT_SECRET || '');
         next();
     } catch (err) {
         response.status(httpStatus.UNAUTHORIZED).json({ message: 'Invalid token' });

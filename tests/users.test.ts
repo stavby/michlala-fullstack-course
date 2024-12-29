@@ -14,7 +14,7 @@ describe('Users API', () => {
 		let userId: string; // Need to take care of this after adding registartion route
 
 		beforeAll(async () => {
-			const response = await request(app).post('/users').send({
+			const response = await request(app).post('/auth/register').send({
 				username: 'testuser',
 				email: 'testuser@example.com',
 				password: 'password',

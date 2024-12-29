@@ -19,12 +19,10 @@ export const register = async (request: Request<{}, {}, Omit<User, '_id'>, {}>, 
 				email: existingUser?.email === email,
 			};
 
-			response
-				.status(httpStatus.BAD_REQUEST)
-				.json({
-					message: 'User already exists with these details',
-					conflictingDetails: userDetailsConflict,
-				});
+			response.status(httpStatus.BAD_REQUEST).json({
+				message: 'User already exists with these details',
+				conflictingDetails: userDetailsConflict,
+			});
 			return;
 		}
 
@@ -36,17 +34,51 @@ export const register = async (request: Request<{}, {}, Omit<User, '_id'>, {}>, 
 	}
 };
 
-export const login = async (request: Request<{}, {}, { username: string; password: string }, {}>, response: Response) => {
+export const login = async (
+	request: Request<{}, {}, Pick<User, 'username' | 'password'>, {}>,
+	response: Response,
+	next: NextFunction
+) => {
 	const { username, password } = request.body;
-	const user = await userModel.findOne({ username }).select('-password');
+	try {
+		const user = await userModel.findOne({ username });
 
-	if (!user || !(await bcrypt.compare(password, user.password))) {
-		response.status(httpStatus.UNAUTHORIZED).json({ message: 'Invalid credentials' });
+		if (!user || !(await bcrypt.compare(password, user.password))) {
+			response.status(httpStatus.UNAUTHORIZED).json({ message: 'Invalid credentials' });
+			return;
+		}
+
+		const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || '', { expiresIn: process.env.AUTH_TOKEN_EXPIRATION_TIME });
+		const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET || '', {
+			expiresIn: process.env.REFRESH_TOKEN_EXPIRATION_TIME,
+		});
+
+		response.status(httpStatus.OK).json({ token, refreshToken });
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const refresh = async (request: Request<{}, {}, { refreshToken: string }, {}>, response: Response, next: NextFunction) => {
+	const { refreshToken } = request.body;
+
+	if (!refreshToken) {
+		response.status(httpStatus.BAD_REQUEST).json({ message: 'No token provided' });
 		return;
 	}
 
-	const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || '', { expiresIn: process.env.JWT_EXPIRATION_TIME });
-	response.json({ token, user });
+	try {
+		const { id: userId } = jwt.verify(refreshToken, process.env.JWT_SECRET || '') as { id: string };
+		const newToken = jwt.sign({ id: userId }, process.env.JWT_SECRET || '', {
+			expiresIn: process.env.AUTH_TOKEN_EXPIRATION_TIME,
+		});
+		const newRefreshToken = jwt.sign({ id: userId }, process.env.JWT_SECRET || '', {
+			expiresIn: process.env.REFRESH_TOKEN_EXPIRATION_TIME,
+		});
+		response.status(httpStatus.OK).json({ token: newToken, refreshToken: newRefreshToken });
+	} catch (error) {
+		response.status(httpStatus.UNAUTHORIZED).json({ message: 'Invalid token' });
+	}
 };
 
 export const logout = (_request: Request, response: Response) => {
