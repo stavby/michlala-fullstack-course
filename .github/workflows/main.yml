@@ -58,3 +58,6 @@ jobs:
 
             - name: Run jest tests
               run: npm test
+
+            - name: Publish Test Summary Results
+              run: npx github-actions-ctrf ctrf/ctrf-report.json
