@@ -24,8 +24,8 @@ app.get('/isAlive', (_request: Request, response: Response) => {
 	response.status(httpStatus.OK).send('Server is alive!');
 });
 
-app.use(authenticationMiddleware);
 app.use('/auth', authenticationRouter);
+app.use(authenticationMiddleware);
 app.use('/posts', postsRouter);
 app.use('/comments', commentsRouter);
 app.use('/users', usersRouter);

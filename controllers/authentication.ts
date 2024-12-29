@@ -2,20 +2,34 @@ import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
-import { userModel } from '../models/users';
+import { userModel, User } from '../models/users';
 
 const SALT_ROUNDS = 10;
 
-export const register = async (
-	request: Request<{}, {}, { username: string; email: string; password: string }, {}>,
-	response: Response,
-	next: NextFunction
-) => {
+export const register = async (request: Request<{}, {}, Omit<User, '_id'>, {}>, response: Response, next: NextFunction) => {
 	const { username, email, password } = request.body;
 	const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
 	try {
-		const { password, ...newUser } = await userModel.create({ username, email, password: hashedPassword });
+		const existingUser = await userModel.findOne({ $or: [{ username }, { email }] });
+
+		if (existingUser) {
+			const userDetailsConflict = {
+				username: existingUser?.username === username,
+				email: existingUser?.email === email,
+			};
+
+			response
+				.status(httpStatus.BAD_REQUEST)
+				.json({
+					message: 'User already exists with these details',
+					conflictingDetails: userDetailsConflict,
+				});
+			return;
+		}
+
+		const creationResponse = await userModel.create({ username, email, password: hashedPassword });
+		const { password, ...newUser } = creationResponse.toJSON();
 		response.status(httpStatus.CREATED).send(newUser);
 	} catch (error) {
 		next(error);
