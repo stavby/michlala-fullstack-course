@@ -88,6 +88,18 @@ describe('Users API', () => {
 				.expect(httpStatus.BAD_REQUEST);
 		});
 
+		it('should return 400 for updating user with empty body', async () => {
+			await request(app).put(`/users/${userId}`).set(getAuthorizationHeader()).send({}).expect(httpStatus.BAD_REQUEST);
+		});
+
+		it('should return 400 for updating user with no body', async () => {
+			await request(app).put(`/users/${userId}`).set(getAuthorizationHeader()).send().expect(httpStatus.BAD_REQUEST);
+		});
+
+		it('should return 400 for getting user with no filters', async () => {
+			await request(app).get(`/users`).set(getAuthorizationHeader()).expect(httpStatus.BAD_REQUEST);
+		});
+
 		it('should return 404 for updating non-existing user id', async () => {
 			const nonExistingId = '6740aa79f7d3b27e1b049771';
 			await request(app)
