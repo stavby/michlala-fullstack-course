@@ -68,7 +68,7 @@ DELETE http://localhost:8080/comments/6740bc6daa86a22352cb55dd
 
 ###
 
-POST http://localhost:8080/users
+POST http://localhost:8080/auth/register
 Content-Type: application/json
 
 {
@@ -77,7 +77,26 @@ Content-Type: application/json
 
 ###
 
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+	"username": "shlomi", "password": "secretpassword123"
+}
+
+###
+
+POST http://localhost:8080/auth/refresh
+Content-Type: application/json
+
+{
+	"refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoicmVmcmVzaCIsInVzZXJJZCI6IjY3NzFjYWJkMzI5ZGZkMjdmZmQ1OTNmYSIsInJhbmRvbSI6IjE3M2I1ZjExY2E4MmY1MzRiNGMyOGU1NTAyNGJhZDdmMzk0ZWFjODQ3NGM5ODM0MWQ4Yjk3NWUyZGZiYzg3OTk1N2RlNjg5OGZlZGQ2Yzk4OWNiNDI1ZTBhZmIyOTExZjc0ZDI4ZjgzOTEwMTgxNDQ4Mzc1ODYyZGViZmYyNGY5IiwiaWF0IjoxNzM1NTExNDQxLCJleHAiOjE3MzU1OTc4NDF9.tnkEGz37xpkt3o2YdQYTTwTaGsTCf45j_9jYPTSrxQc"
+}
+
+###
+
 GET http://localhost:8080/users?username=shlomi
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIiwidXNlcklkIjoiNjc3MWNhYmQzMjlkZmQyN2ZmZDU5M2ZhIiwicmFuZG9tIjoiNGE5MTBhN2ZmMDM4NzhkZDc2OTk2MGUzNTY5NDgxOGI0ZTMxNTE5ZTBmM2IxN2VjYWQwOWMyZDkxYWM5N2FlYzE5ZTMzZDlhMzg3ZTBlNDMzZjZlZjg3NWRhYTQwYmZiMzIzNTJiMzkzNWI2MjQ5MzMwOWYwMzQyNTMyZjlhZmMiLCJpYXQiOjE3MzU1MTI0MDQsImV4cCI6MTczNTUxNjAwNH0.FxtBS6duLDCrdkdtJ79nvaXdzBtbNY-_rz10O_IY2XI
 
 ###
 

@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import { isValidObjectId } from 'mongoose';
 import { commentModel } from '../models/comments';
 import { postModel } from '../models/posts';
+import { AddUserIdToRequest } from '../utils/types';
 
 export const createComment = async (request: Request, response: Response, next: NextFunction) => {
 	const data = request.body;
@@ -20,7 +21,7 @@ export const createComment = async (request: Request, response: Response, next: 
 	}
 
 	try {
-		const newComment = await commentModel.create(data);
+		const newComment = await commentModel.create({ ...data, sender: (request as AddUserIdToRequest<Request>).userId });
 		response.status(httpStatus.CREATED).send(newComment);
 	} catch (error) {
 		next(error);
@@ -75,7 +76,7 @@ export const getCommentById = async (request: Request<{ id: string }>, response:
 
 export const updateCommentById = async (request: Request<{ id: string }>, response: Response, next: NextFunction) => {
 	const { id: commentId } = request.params;
-	const data = request.body;
+	const { sender, ...data } = request.body;
 
 	if (!isValidObjectId(commentId)) {
 		response.status(httpStatus.BAD_REQUEST).send(`Invalid id "${commentId}"`);

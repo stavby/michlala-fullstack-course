@@ -14,7 +14,7 @@ export const getUserByDetails = async (request: Request<{}, {}, {}, Partial<User
 	}
 
 	try {
-		const user = await userModel.findOne(filters).select('-password');
+		const user = await userModel.findOne(filters).select('-password -refreshTokens');
 		response.status(httpStatus.OK).send(user);
 	} catch (error) {
 		next(error);
