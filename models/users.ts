@@ -79,6 +79,6 @@ export type User = TypeWithId<InferRawDocType<typeof userSchemaDefinition>>;
  *       example:
  *         username: "shlomi"
  *         email: "shlomi@gmail.com"
- *         password: "105de2865bb931f9fc19fcc90e0f6457edab462c40b8cc1c2506f0781ec5345c"
+ *         password: "<hashed password>"
  *         refreshTokens: []
  */
