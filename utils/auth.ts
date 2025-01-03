@@ -9,11 +9,11 @@ export const generateTokens = (userId: string) => {
 		jwtOptions: { jwtSecret, accessTokenExpiration, refreshTokenExpiration },
 	} = appConfig;
 
-	const accessToken = jwt.sign({ type: 'access', userId, random: getRandom() }, jwtSecret || '', {
+	const accessToken = jwt.sign({ type: 'access', userId, random: getRandom() }, jwtSecret, {
 		expiresIn: accessTokenExpiration,
 	});
 
-	const refreshToken = jwt.sign({ type: 'refresh', userId, random: getRandom() }, jwtSecret || '', {
+	const refreshToken = jwt.sign({ type: 'refresh', userId, random: getRandom() }, jwtSecret, {
 		expiresIn: refreshTokenExpiration,
 	});
 

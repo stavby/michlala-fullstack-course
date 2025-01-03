@@ -75,7 +75,7 @@ export type User = TypeWithId<InferRawDocType<typeof userSchemaDefinition>>;
  *           type: array
  *           items:
  *             type: string
- *           description: The refresh tokens of the user.
+ *           description: The currently active refresh tokens of the user.
  *       example:
  *         username: "shlomi"
  *         email: "shlomi@gmail.com"

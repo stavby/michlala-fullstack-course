@@ -19,8 +19,11 @@ describe('Comments API', () => {
 	const getAuthorizationHeader = () => ({ Authorization: `Bearer ${accessToken}` });
 
 	beforeAll(async () => {
-		const { accessToken: newAccessToken, userId: newUserId } = await login('comments-test-user', 'comments-test-user@gmail.com');
-		accessToken = newAccessToken;
+		const { accessToken: initialAccessToken, userId: newUserId } = await login(
+			'comments-test-user',
+			'comments-test-user@gmail.com'
+		);
+		accessToken = initialAccessToken;
 		userId = newUserId;
 
 		const response = await request(app).post('/posts').set(getAuthorizationHeader()).send({

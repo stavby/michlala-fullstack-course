@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
-import { AddUserIdToRequest, Token } from '../utils/types';
+import jwt from 'jsonwebtoken';
 import { appConfig } from '../utils/appConfig';
+import { AddUserIdToRequest, Token } from '../utils/types';
 
 export const authorize = (request: Request, response: Response, next: NextFunction) => {
 	const {
@@ -16,7 +16,7 @@ export const authorize = (request: Request, response: Response, next: NextFuncti
 	}
 
 	try {
-		const { type, userId } = jwt.verify(token, jwtSecret || '') as Token;
+		const { type, userId } = jwt.verify(token, jwtSecret) as Token;
 		if (type !== 'access') {
 			response.status(httpStatus.UNAUTHORIZED).json({ message: 'Invalid token' });
 			return;

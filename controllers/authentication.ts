@@ -64,36 +64,42 @@ export const refresh = async (request: Request<{}, {}, { refreshToken: string },
 	const {
 		jwtOptions: { jwtSecret },
 	} = appConfig;
-	const { refreshToken: currentRefreshToken } = request.body;
+	const { refreshToken } = request.body;
+
+	if (!refreshToken) {
+		response.status(httpStatus.BAD_REQUEST).json({ message: 'No token provided' });
+		return;
+	}
 
 	try {
-		if (!currentRefreshToken) {
-			response.status(httpStatus.BAD_REQUEST).json({ message: 'No token provided' });
+		const { userId, type } = jwt.verify(refreshToken, jwtSecret) as Token;
+		if (type !== 'refresh') {
+			response.status(httpStatus.UNAUTHORIZED).json({ message: 'Invalid token' });
 			return;
 		}
 
-		try {
-			const { userId, type } = jwt.verify(currentRefreshToken, jwtSecret || '') as Token;
-			if (type !== 'refresh') {
-				response.status(httpStatus.UNAUTHORIZED).json({ message: 'Invalid token' });
-				return;
-			}
-			const user = await userModel.findById(userId, { refreshTokens: true });
-			if (!user || !user.refreshTokens?.includes(currentRefreshToken)) {
-				response.status(httpStatus.UNAUTHORIZED).json({ message: 'Invalid token' });
-				return;
-			}
-			const { accessToken, refreshToken } = generateTokens(userId);
-
-			user.refreshTokens = user.refreshTokens.filter((token) => token !== currentRefreshToken);
-			user.refreshTokens.push(refreshToken);
-			await user.save();
-
-			response.status(httpStatus.OK).json({ accessToken, refreshToken });
-		} catch (error) {
+		const user = await userModel.findById(userId, { refreshTokens: true });
+		if (!user || !user.refreshTokens?.includes(refreshToken)) {
 			response.status(httpStatus.UNAUTHORIZED).json({ message: 'Invalid token' });
+			return;
 		}
+		const { accessToken, refreshToken: newRefreshToken } = generateTokens(userId);
+
+		user.refreshTokens = user.refreshTokens.filter((token) => token !== refreshToken);
+		user.refreshTokens.push(newRefreshToken);
+		await user.save();
+
+		response.status(httpStatus.OK).json({ accessToken, refreshToken: newRefreshToken });
 	} catch (error) {
+		if (error instanceof jwt.TokenExpiredError) {
+			response.status(httpStatus.UNAUTHORIZED).json({ message: 'Token expired' });
+			return;
+		}
+		if (error instanceof jwt.JsonWebTokenError || error instanceof SyntaxError) {
+			response.status(httpStatus.UNAUTHORIZED).json({ message: 'Invalid token' });
+			return;
+		}
+
 		next(error);
 	}
 };
