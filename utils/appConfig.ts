@@ -10,4 +10,4 @@ export const appConfig = {
 	},
 	dbURL: process.env.DB_URL || 'mongodb://localhost:27017/michlala',
 	saltRounds: Number(process.env.SALT_ROUNDS) || 10,
-};
+} as const;
