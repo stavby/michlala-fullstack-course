@@ -1,12 +1,10 @@
 import mongoose from 'mongoose';
+import { appConfig } from '../utils/appConfig';
 
 export const startDB = () => {
-	const { DB_URL } = process.env;
-	if (!DB_URL) {
-		throw new Error('DB_URL env variable missing');
-	}
+	const { dbURL } = appConfig;
 
-	mongoose.connect(DB_URL);
+	mongoose.connect(dbURL);
 	const db = mongoose.connection;
 	db.on('error', (error) => console.error(error));
 	db.once('open', () => console.log('Connected to mongo database'));

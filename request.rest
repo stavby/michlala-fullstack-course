@@ -68,7 +68,7 @@ DELETE http://localhost:8080/comments/6740bc6daa86a22352cb55dd
 
 ###
 
-POST http://localhost:8080/users
+POST http://localhost:8080/auth/register
 Content-Type: application/json
 
 {
@@ -77,7 +77,26 @@ Content-Type: application/json
 
 ###
 
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+	"username": "shlomi", "password": "secretpassword123"
+}
+
+###
+
+POST http://localhost:8080/auth/refresh
+Content-Type: application/json
+
+{
+	"refreshToken": "<refresh token>"
+}
+
+###
+
 GET http://localhost:8080/users?username=shlomi
+Authorization: bearer <access token>
 
 ###
 

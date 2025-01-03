@@ -6,11 +6,11 @@ const postSchemaDefinition = {
 		type: String,
 		required: true,
 	},
-	content: String,
 	sender: {
 		type: String,
 		required: true,
 	},
+	content: String,
 } as const;
 
 const postSchema = new Schema(postSchemaDefinition);
